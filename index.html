@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Multi-Calculator App</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .calculator-card {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .tab-active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .calculator-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .calculator-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .calculator-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .result-display {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .input-field {
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+        }
+        
+        @media (max-width: 640px) {
+            .calculator-grid {
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8 fade-in">
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4">
+                <i class="fas fa-calculator mr-4"></i>Premium Calculator
+            </h1>
+            <p class="text-xl text-white opacity-90">Professional calculation suite for all your needs</p>
+        </div>
+
+        <!-- Calculator Card -->
+        <div class="max-w-4xl mx-auto calculator-card rounded-3xl shadow-2xl overflow-hidden fade-in">
+            <!-- Tab Navigation -->
+            <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg">
+                <div class="flex overflow-x-auto scrollbar-hide">
+                    <button onclick="switchTab('basic')" id="tab-basic" class="tab-btn tab-active flex-shrink-0 px-6 py-4 text-sm font-medium transition-all duration-300">
+                        <i class="fas fa-calculator mr-2"></i>Basic
+                    </button>
+                    <button onclick="switchTab('age')" id="tab-age" class="tab-btn flex-shrink-0 px-6 py-4 text-sm font-medium transition-all duration-300">
+                        <i class="fas fa-birthday-cake mr-2"></i>Age
+                    </button>
+                    <button onclick="switchTab('emi')" id="tab-emi" class="tab-btn flex-shrink-0 px-6 py-4 text-sm font-medium transition-all duration-300">
+                        <i class="fas fa-home mr-2"></i>EMI
+                    </button>
+                    <button onclick="switchTab('bmi')" id="tab-bmi" class="tab-btn flex-shrink-0 px-6 py-4 text-sm font-medium transition-all duration-300">
+                        <i class="fas fa-weight mr-2"></i>BMI
+                    </button>
+                    <button onclick="switchTab('tip')" id="tab-tip" class="tab-btn flex-shrink-0 px-6 py-4 text-sm font-medium transition-all duration-300">
+                        <i class="fas fa-coins mr-2"></i>Tip
+                    </button>
+                    <button onclick="switchTab('compound')" id="tab-compound" class="tab-btn flex-shrink-0 px-6 py-4 text-sm font-medium transition-all duration-300">
+                        <i class="fas fa-chart-line mr-2"></i>Compound Interest
+                    </button>
+                    <button onclick="switchTab('unit')" id="tab-unit" class="tab-btn flex-shrink-0 px-6 py-4 text-sm font-medium transition-all duration-300">
+                        <i class="fas fa-exchange-alt mr-2"></i>Unit Converter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Calculator Content -->
+            <div class="p-6 md:p-8">
+                <!-- Basic Calculator -->
+                <div id="basic-calc" class="calculator-content">
+                    <div class="mb-6">
+                        <input type="text" id="display" class="w-full p-4 text-3xl text-right bg-gray-100 rounded-xl border-none focus:outline-none focus:ring-4 focus:ring-purple-300" readonly>
+                    </div>
+                    <div class="calculator-grid">
+                        <button onclick="clearDisplay()" class="calculator-btn bg-red-500 hover:bg-red-600 text-white p-4 rounded-xl font-semibold text-lg">C</button>
+                        <button onclick="deleteLast()" class="calculator-btn bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-xl font-semibold text-lg">⌫</button>
+                        <button onclick="appendToDisplay('/')" class="calculator-btn bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-xl font-semibold text-lg">÷</button>
+                        <button onclick="appendToDisplay('*')" class="calculator-btn bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-xl font-semibold text-lg">×</button>
+                        
+                        <button onclick="appendToDisplay('7')" class="calculator-btn bg-gray-200 hover:bg-gray-300 text-gray-800 p-4 rounded-xl font-semibold text-lg">7</button>
+                        <button onclick="appendToDisplay('8')" class="calculator-btn bg-gray-200 hover:bg-gray-300 text-gray-800 p-4 rounded-xl font-semibold text-lg">8</button>
+                        <button onclick="appendToDisplay('9')" class="calculator-btn bg-gray-200 hover:bg-gray-300 text-gray-800 p-4 rounded-xl font-semibold text-lg">9</button>
+                        <button onclick="appendToDisplay('-')" class="calculator-btn bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-xl font-semibold text-lg">−</button>
+                        
+                        <button onclick="appendToDisplay('4')" class="calculator-btn bg-gray-200 hover:bg-gray-300 text-gray-800 p-4 rounded-xl font-semibold text-lg">4</button>
+                        <button onclick="appendToDisplay('5')" class="calculator-btn bg-gray-200 hover:bg-gray-300 text-gray-800 p-4 rounded-xl font-semibold text-lg">5</button>
+                        <button onclick="appendToDisplay('6')" class="calculator-btn bg-gray-200 hover:bg-gray-300 text-gray-800 p-4 rounded-xl font-semibold text-lg">6</button>
+                        <button onclick="appendToDisplay('+')" class="calculator-btn bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-xl font-semibold text-lg">+</button>
+                        
+                        <button onclick="appendToDisplay('1')" class="calculator-btn bg-gray-200 hover:bg-gray-300 text-gray-800 p-4 rounded-xl font-semibold text-lg">1</button>
+                        <button onclick="appendToDisplay('2')" class="calculator-btn bg-gray-200 hover:bg-gray-300 text-gray-800 p-4 rounded-xl font-semibold text-lg">2</button>
+                        <button onclick="appendToDisplay('3')" class="calculator-btn bg-gray-200 hover:bg-gray-300 text-gray-800 p-4 rounded-xl font-semibold text-lg">3</button>
+                        <button onclick="calculate()" class="calculator-btn btn-gradient text-white p-4 rounded-xl font-semibold text-lg row-span-2">=</button>
+                        
+                        <button onclick="appendToDisplay('0')" class="calculator-btn bg-gray-200 hover:bg-gray-300 text-gray-800 p-4 rounded-xl font-semibold text-lg col-span-2">0</button>
+                        <button onclick="appendToDisplay('.')" class="calculator-btn bg-gray-200 hover:bg-gray-300 text-gray-800 p-4 rounded-xl font-semibold text-lg">.</button>
+                    </div>
+                </div>
+
+                <!-- Age Calculator -->
+                <div id="age-calc" class="calculator-content hidden">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-gray-800">Calculate Your Age</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Birth Date</label>
+                                    <input type="date" id="birthDate" class="input-field w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Calculate Age On (Optional)</label>
+                                    <input type="date" id="targetDate" class="input-field w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                </div>
+                                <button onclick="calculateAge()" class="btn-gradient w-full text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg">
+                                    <i class="fas fa-calculator mr-2"></i>Calculate Age
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-gray-800">Age Details</h3>
+                            <div id="ageResult" class="bg-gradient-to-r from-purple-100 to-pink-100 p-6 rounded-xl">
+                                <p class="text-gray-600">Enter your birth date to see detailed age calculation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EMI Calculator -->
+                <div id="emi-calc" class="calculator-content hidden">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-gray-800">EMI Calculator</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Loan Amount (₹)</label>
+                                    <input type="number" id="loanAmount" placeholder="500000" class="input-field w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Interest Rate (% per annum)</label>
+                                    <input type="number" id="interestRate" placeholder="8.5" step="0.1" class="input-field w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Loan Tenure (Years)</label>
+                                    <input type="number" id="loanTenure" placeholder="20" class="input-field w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                </div>
+                                <button onclick="calculateEMI()" class="btn-gradient w-full text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg">
+                                    <i class="fas fa-home mr-2"></i>Calculate EMI
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-gray-800">EMI Breakdown</h3>
+                            <div id="emiResult" class="bg-gradient-to-r from-blue-100 to-green-100 p-6 rounded-xl">
+                                <p class="text-gray-600">Enter loan details to see EMI calculation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BMI Calculator -->
+                <div id="bmi-calc" class="calculator-content hidden">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-gray-800">BMI Calculator</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
+                                    <input type="number" id="weight" placeholder="70" step="0.1" class="input-field w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Height (cm)</label>
+                                    <input type="number" id="height" placeholder="175" step="0.1" class="input-field w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                </div>
+                                <button onclick="calculateBMI()" class="btn-gradient w-full text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg">
+                                    <i class="fas fa-weight mr-2"></i>Calculate BMI
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-gray-800">BMI Result</h3>
+                            <div id="bmiResult" class="bg-gradient-to-r from-green-100 to-blue-100 p-6 rounded-xl">
+                                <p class="text-gray-600">Enter your weight and height to calculate BMI</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tip Calculator -->
+                <div id="tip-calc" class="calculator-content hidden">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-gray-800">Tip Calculator</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Bill Amount (₹)</label>
+                                    <input type="number" id="billAmount" placeholder="1000" step="0.01" class="input-field w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tip Percentage (%)</label>
+                                    <input type="number" id="tipPercentage" placeholder="15" step="0.1" class="input-field w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Number of People</label>
+                                    <input type="number" id="numberOfPeople" placeholder="1" min="1" class="input-field w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="setTipPercentage(10)" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-xl font-medium">10%</button>
+                                    <button onclick="setTipPercentage(15)" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-xl font-medium">15%</button>
+                                    <button onclick="setTipPercentage(20)" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-xl font-medium">20%</button>
+                                </div>
+                                <button onclick="calculateTip()" class="btn-gradient w-full text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg">
+                                    <i class="fas fa-coins mr-2"></i>Calculate Tip
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-gray-800">Tip Breakdown</h3>
+                            <div id="tipResult" class="bg-gradient-to-r from-yellow-100 to-orange-100 p-6 rounded-xl">
+                                <p class="text-gray-600">Enter bill details to calculate tip</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compound Interest Calculator -->
+                <div id="compound-calc" class="calculator-content hidden">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-gray-800">Compound Interest</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Principal Amount (₹)</label>
+                                    <input type="number" id="principal" placeholder="100000" class="input-field w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Annual Interest Rate (%)</label>
+                                    <input type="number" id="annualRate" placeholder="8" step="0.1" class="input-field w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Time Period (Years)</label>
+                                    <input type="number" id="timePeriod" placeholder="10" class="input-field w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Compounding Frequency</label>
+                                    <select id="compoundFrequency" class="input-field w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                        <option value="1">Annually</option>
+                                        <option value="2">Semi-annually</option>
+                                        <option value="4">Quarterly</option>
+                                        <option value="12">Monthly</option>
+                                        <option value="365">Daily</option>
+                                    </select>
+                                </div>
+                                <button onclick="calculateCompoundInterest()" class="btn-gradient w-full text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg">
+                                    <i class="fas fa-chart-line mr-2"></i>Calculate
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-gray-800">Investment Growth</h3>
+                            <div id="compoundResult" class="bg-gradient-to-r from-purple-100 to-pink-100 p-6 rounded-xl">
+                                <p class="text-gray-600">Enter investment details to see compound interest calculation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Unit Converter -->
+                <div id="unit-calc" class="calculator-content hidden">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-gray-800">Unit Converter</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Conversion Type</label>
+                                    <select id="conversionType" onchange="updateUnits()" class="input-field w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                        <option value="length">Length</option>
+                                        <option value="weight">Weight</option>
+                                        <option value="temperature">Temperature</option>
+                                        <option value="area">Area</option>
+                                        <option value="volume">Volume</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">From</label>
+                                    <div class="flex space-x-2">
+                                        <input type="number" id="fromValue" placeholder="1" step="any" class="input-field flex-1 p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                        <select id="fromUnit" class="input-field flex-1 p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">To</label>
+                                    <div class="flex space-x-2">
+                                        <input type="number" id="toValue" readonly class="input-field flex-1 p-3 border border-gray-300 rounded-xl bg-gray-50">
+                                        <select id="toUnit" class="input-field flex-1 p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300">
+                                        </select>
+                                    </div>
+                                </div>
+                                <button onclick="convertUnits()" class="btn-gradient w-full text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg">
+                                    <i class="fas fa-exchange-alt mr-2"></i>Convert
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-gray-800">Conversion Result</h3>
+                            <div id="unitResult" class="bg-gradient-to-r from-indigo-100 to-purple-100 p-6 rounded-xl">
+                                <p class="text-gray-600">Select conversion type and enter values to convert units</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-white opacity-75">
+            <p>&copy; 2024 Premium Calculator App. Designed with ❤️ for productivity.</p>
+        </div>
+    </div>
+
+    <script>
+        // Basic Calculator Functions
+        function appendToDisplay(value) {
+            const display = document.getElementById('display');
+            if (display.value === '0' && value !== '.') {
+                display.value = value;
+            } else {
+                display.value += value;
+            }
+        }
+
+        function clearDisplay() {
+            document.getElementById('display').value = '';
+        }
+
+        function deleteLast() {
+            const display = document.getElementById('display');
+            display.value = display.value.slice(0, -1);
+        }
+
+        function calculate() {
+            const display = document.getElementById('display');
+            try {
+                // Replace display symbols with actual operators
+                let expression = display.value.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+                const result = eval(expression);
+                display.value = result;
+            } catch (error) {
+                display.value = 'Error';
+            }
+        }
+
+        // Tab Switching
+        function switchTab(tabName) {
+            // Hide all calculator contents
+            const contents = document.querySelectorAll('.calculator-content');
+            contents.forEach(content => content.classList.add('hidden'));
+
+            // Show selected content
+            document.getElementById(tabName + '-calc').classList.remove('hidden');
+
+            // Update tab buttons
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => tab.classList.remove('tab-active'));
+            document.getElementById('tab-' + tabName).classList.add('tab-active');
+        }
+
+        // Age Calculator
+        function calculateAge() {
+            const birthDate = new Date(document.getElementById('birthDate').value);
+            const targetDate = document.getElementById('targetDate').value ? 
+                new Date(document.getElementById('targetDate').value) : new Date();
+
+            if (!birthDate) {
+                alert('Please enter your birth date');
+                return;
+            }
+
+            const ageInMs = targetDate - birthDate;
+            const ageInDays = Math.floor(ageInMs / (1000 * 60 * 60 * 24));
+            const years = Math.floor(ageInDays / 365.25);
+            const months = Math.floor((ageInDays % 365.25) / 30.44);
+            const days = Math.floor((ageInDays % 365.25) % 30.44);
+
+            const totalMonths = Math.floor(ageInDays / 30.44);
+            const totalWeeks = Math.floor(ageInDays / 7);
+            const totalHours = Math.floor(ageInMs / (1000 * 60 * 60));
+            const totalMinutes = Math.floor(ageInMs / (1000 * 60));
+
+            document.getElementById('ageResult').innerHTML = `
+                <div class="space-y-3">
+                    <div class="text-center">
+                        <h4 class="text-4xl font-bold result-display">${years} Years</h4>
+                        <p class="text-lg text-gray-600">${months} months and ${days} days</p>
+                    </div>
+                    <hr class="border-gray-300">
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                            <p class="text-2xl font-bold text-purple-600">${totalMonths}</p>
+                            <p class="text-sm text-gray-600">Total Months</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-purple-600">${totalWeeks}</p>
+                            <p class="text-sm text-gray-600">Total Weeks</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-purple-600">${ageInDays}</p>
+                            <p class="text-sm text-gray-600">Total Days</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-purple-600">${totalHours.toLocaleString()}</p>
+                            <p class="text-sm text-gray-600">Total Hours</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // EMI Calculator
+        function calculateEMI() {
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+            const interestRate = parseFloat(document.getElementById('interestRate').value);
+            const loanTenure = parseFloat(document.getElementById('loanTenure').value);
+
+            if (!loanAmount || !interestRate || !loanTenure) {
+                alert('Please enter all EMI details');
+                return;
+            }
+
+            const monthlyRate = interestRate / 12 / 100;
+            const numberOfPayments = loanTenure * 12;
+
+            const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / 
+                        (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+
+            const totalAmount = emi * numberOfPayments;
+            const totalInterest = totalAmount - loanAmount;
+
+            document.getElementById('emiResult').innerHTML = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h4 class="text-3xl font-bold result-display">₹${emi.toLocaleString('en-IN', {maximumFractionDigits: 0})}</h4>
+                        <p class="text-lg text-gray-600">Monthly EMI</p>
+                    </div>
+                    <hr class="border-gray-300">
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Principal Amount:</span>
+                            <span class="font-bold text-green-600">₹${loanAmount.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Total Interest:</span>
+                            <span class="font-bold text-red-600">₹${totalInterest.toLocaleString('en-IN', {maximumFractionDigits: 0})}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Total Amount:</span>
+                            <span class="font-bold text-blue-600">₹${totalAmount.toLocaleString('en-IN', {maximumFractionDigits: 0})}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Total Payments:</span>
+                            <span class="font-bold text-purple-600">${numberOfPayments} months</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // BMI Calculator
+        function calculateBMI() {
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value) / 100; // Convert cm to m
+
+            if (!weight || !height) {
+                alert('Please enter weight and height');
+                return;
+            }
+
+            const bmi = weight / (height * height);
+            let category = '';
+            let color = '';
+
+            if (bmi < 18.5) {
+                category = 'Underweight';
+                color = 'text-blue-600';
+            } else if (bmi < 25) {
+                category = 'Normal weight';
+                color = 'text-green-600';
+            } else if (bmi < 30) {
+                category = 'Overweight';
+                color = 'text-yellow-600';
+            } else {
+                category = 'Obese';
+                color = 'text-red-600';
+            }
+
+            document.getElementById('bmiResult').innerHTML = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h4 class="text-4xl font-bold result-display">${bmi.toFixed(1)}</h4>
+                        <p class="text-xl font-semibold ${color}">${category}</p>
+                    </div>
+                    <hr class="border-gray-300">
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Underweight:</span>
+                            <span class="text-sm ${bmi < 18.5 ? 'font-bold text-blue-600' : 'text-gray-400'}">< 18.5</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Normal:</span>
+                            <span class="text-sm ${bmi >= 18.5 && bmi < 25 ? 'font-bold text-green-600' : 'text-gray-400'}">18.5 - 24.9</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Overweight:</span>
+                            <span class="text-sm ${bmi >= 25 && bmi < 30 ? 'font-bold text-yellow-600' : 'text-gray-400'}">25 - 29.9</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Obese:</span>
+                            <span class="text-sm ${bmi >= 30 ? 'font-bold text-red-600' : 'text-gray-400'}">≥ 30</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Tip Calculator
+        function setTipPercentage(percentage) {
+            document.getElementById('tipPercentage').value = percentage;
+            calculateTip();
+        }
+
+        function calculateTip() {
+            const billAmount = parseFloat(document.getElementById('billAmount').value);
+            const tipPercentage = parseFloat(document.getElementById('tipPercentage').value);
+            const numberOfPeople = parseInt(document.getElementById('numberOfPeople').value) || 1;
+
+            if (!billAmount || !tipPercentage) {
+                alert('Please enter bill amount and tip percentage');
+                return;
+            }
+
+            const tipAmount = billAmount * (tipPercentage / 100);
+            const totalAmount = billAmount + tipAmount;
+            const perPersonBill = billAmount / numberOfPeople;
+            const perPersonTip = tipAmount / numberOfPeople;
+            const perPersonTotal = totalAmount / numberOfPeople;
+
+            document.getElementById('tipResult').innerHTML = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h4 class="text-3xl font-bold result-display">₹${tipAmount.toFixed(2)}</h4>
+                        <p class="text-lg text-gray-600">Total Tip Amount</p>
+                    </div>
+                    <hr class="border-gray-300">
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Bill Amount:</span>
+                            <span class="font-bold text-blue-600">₹${billAmount.toFixed(2)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Tip (${tipPercentage}%):</span>
+                            <span class="font-bold text-green-600">₹${tipAmount.toFixed(2)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Total Amount:</span>
+                            <span class="font-bold text-purple-600">₹${totalAmount.toFixed(2)}</span>
+                        </div>
+                        ${numberOfPeople > 1 ? `
+                        <hr class="border-gray-300">
+                        <h5 class="font-semibold text-gray-800 text-center">Per Person (${numberOfPeople} people)</h5>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Bill:</span>
+                            <span class="font-bold text-blue-600">₹${perPersonBill.toFixed(2)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Tip:</span>
+                            <span class="font-bold text-green-600">₹${perPersonTip.toFixed(2)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Total:</span>
+                            <span class="font-bold text-purple-600">₹${perPersonTotal.toFixed(2)}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Compound Interest Calculator
+        function calculateCompoundInterest() {
+            const principal = parseFloat(document.getElementById('principal').value);
+            const annualRate = parseFloat(document.getElementById('annualRate').value);
+            const timePeriod = parseFloat(document.getElementById('timePeriod').value);
+            const compoundFrequency = parseInt(document.getElementById('compoundFrequency').value);
+
+            if (!principal || !annualRate || !timePeriod || !compoundFrequency) {
+                alert('Please enter all compound interest details');
+                return;
+            }
+
+            const rate = annualRate / 100;
+            const amount = principal * Math.pow((1 + rate / compoundFrequency), compoundFrequency * timePeriod);
+            const compoundInterest = amount - principal;
+            const totalGrowth = ((amount - principal) / principal) * 100;
+
+            document.getElementById('compoundResult').innerHTML = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h4 class="text-3xl font-bold result-display">₹${amount.toLocaleString('en-IN', {maximumFractionDigits: 0})}</h4>
+                        <p class="text-lg text-gray-600">Final Amount</p>
+                    </div>
+                    <hr class="border-gray-300">
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Principal:</span>
+                            <span class="font-bold text-blue-600">₹${principal.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Compound Interest:</span>
+                            <span class="font-bold text-green-600">₹${compoundInterest.toLocaleString('en-IN', {maximumFractionDigits: 0})}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Total Growth:</span>
+                            <span class="font-bold text-purple-600">${totalGrowth.toFixed(2)}%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Time Period:</span>
+                            <span class="font-bold text-orange-600">${timePeriod} years</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Annual Rate:</span>
+                            <span class="font-bold text-red-600">${annualRate}%</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Unit Converter
+        const unitConversions = {
+            length: {
+                meter: 1,
+                kilometer: 0.001,
+                centimeter: 100,
+                millimeter: 1000,
+                inch: 39.3701,
+                foot: 3.28084,
+                yard: 1.09361,
+                mile: 0.000621371
+            },
+            weight: {
+                kilogram: 1,
+                gram: 1000,
+                pound: 2.20462,
+                ounce: 35.274,
+                ton: 0.001,
+                stone: 0.157473
+            },
+            temperature: {
+                celsius: { to: (c) => ({ celsius: c, fahrenheit: c * 9/5 + 32, kelvin: c + 273.15 }) },
+                fahrenheit: { to: (f) => ({ celsius: (f - 32) * 5/9, fahrenheit: f, kelvin: (f - 32) * 5/9 + 273.15 }) },
+                kelvin: { to: (k) => ({ celsius: k - 273.15, fahrenheit: (k - 273.15) * 9/5 + 32, kelvin: k }) }
+            },
+            area: {
+                'square meter': 1,
+                'square kilometer': 0.000001,
+                'square centimeter': 10000,
+                'square inch': 1550.0031,
+                'square foot': 10.7639,
+                'acre': 0.000247105,
+                'hectare': 0.0001
+            },
+            volume: {
+                liter: 1,
+                milliliter: 1000,
+                'cubic meter': 0.001,
+                gallon: 0.264172,
+                quart: 1.05669,
+                pint: 2.11338,
+                cup: 4.22675,
+                'fluid ounce': 33.814
+            }
+        };
+
+        function updateUnits() {
+            const conversionType = document.getElementById('conversionType').value;
+            const fromUnit = document.getElementById('fromUnit');
+            const toUnit = document.getElementById('toUnit');
+
+            fromUnit.innerHTML = '';
+            toUnit.innerHTML = '';
+
+            const units = Object.keys(unitConversions[conversionType]);
+            units.forEach(unit => {
+                fromUnit.innerHTML += `<option value="${unit}">${unit}</option>`;
+                toUnit.innerHTML += `<option value="${unit}">${unit}</option>`;
+            });
+
+            // Set different default values
+            if (units.length > 1) {
+                toUnit.selectedIndex = 1;
+            }
+        }
+
+        function convertUnits() {
+            const conversionType = document.getElementById('conversionType').value;
+            const fromValue = parseFloat(document.getElementById('fromValue').value);
+            const fromUnit = document.getElementById('fromUnit').value;
+            const toUnit = document.getElementById('toUnit').value;
+
+            if (!fromValue) {
+                alert('Please enter a value to convert');
+                return;
+            }
+
+            let result;
+
+            if (conversionType === 'temperature') {
+                const conversion = unitConversions.temperature[fromUnit].to(fromValue);
+                result = conversion[toUnit];
+            } else {
+                const baseValue = fromValue / unitConversions[conversionType][fromUnit];
+                result = baseValue * unitConversions[conversionType][toUnit];
+            }
+
+            document.getElementById('toValue').value = result.toFixed(6);
+
+            document.getElementById('unitResult').innerHTML = `
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h4 class="text-3xl font-bold result-display">${result.toFixed(6)}</h4>
+                        <p class="text-lg text-gray-600">${toUnit}</p>
+                    </div>
+                    <hr class="border-gray-300">
+                    <div class="text-center">
+                        <p class="text-xl font-semibold text-gray-800">
+                            ${fromValue} ${fromUnit} = ${result.toFixed(6)} ${toUnit}
+                        </p>
+                        <p class="text-sm text-gray-600 mt-2">
+                            Conversion: ${conversionType.charAt(0).toUpperCase() + conversionType.slice(1)}
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUnits();
+            
+            // Add real-time conversion for unit converter
+            document.getElementById('fromValue').addEventListener('input', convertUnits);
+            document.getElementById('fromUnit').addEventListener('change', convertUnits);
+            document.getElementById('toUnit').addEventListener('change', convertUnits);
+        });
+
+        // Keyboard support for basic calculator
+        document.addEventListener('keydown', function(event) {
+            if (document.getElementById('basic-calc').classList.contains('hidden')) return;
+            
+            const key = event.key;
+            if ('0123456789'.includes(key)) {
+                appendToDisplay(key);
+            } else if (key === '+' || key === '-') {
+                appendToDisplay(key);
+            } else if (key === '*') {
+                appendToDisplay('*');
+            } else if (key === '/') {
+                event.preventDefault();
+                appendToDisplay('/');
+            } else if (key === 'Enter' || key === '=') {
+                event.preventDefault();
+                calculate();
+            } else if (key === 'Escape' || key === 'c' || key === 'C') {
+                clearDisplay();
+            } else if (key === 'Backspace') {
+                deleteLast();
+            } else if (key === '.') {
+                appendToDisplay('.');
+            }
+        });
+    </script>
+</body>
+</html>
